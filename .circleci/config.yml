@@ -37,32 +37,8 @@ jobs:
               echo "No package.json found"
             fi
 
-  deploy_to_ec2:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - add_ssh_keys:
-          fingerprints:
-            - "SHA256:9ajH+lqwmRGo1IWNb2wwtf2IDAByxh1TxNjmmINm6DM"
-      - run:
-          name: Deploy
-          command: |
-            ssh -o StrictHostKeyChecking=no ec2-user@$EC2_IP "
-              if [ ! -d /home/ec2-user/blog-app ]; then
-                git clone https://github.com/MaheshKumarBisai/Blog-app.git /home/ec2-user/blog-app
-              fi &&
-              cd /home/ec2-user/blog-app && git pull origin main &&
-              npm install --prefix frontend &&
-              pip install -r backend/requirements.txt &&
-              sudo systemctl restart blog-app
-            "
-
 workflows:
   ci_cd_pipeline:
     jobs:
       - backend_ci
       - frontend_ci
-      - deploy_to_ec2:
-          requires:
-            - backend_ci
-            - frontend_ci
