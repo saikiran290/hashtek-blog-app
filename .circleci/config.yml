@@ -3,23 +3,19 @@ version: 2.1
 jobs:
   backend_ci:
     docker:
-      - image: cimg/python:3.11
+      - image: cimg/node:18.0
     steps:
       - checkout
       - run:
           name: Install Backend Dependencies
           command: |
             cd backend
-            if [ -f requirements.txt ]; then
-              pip install -r requirements.txt
-            else
-              echo "No requirements.txt found"
-            fi
+            npm install
       - run:
           name: Run Backend Tests
           command: |
             cd backend
-            pytest || echo "No tests"
+            npm test || echo "No tests"
 
   frontend_ci:
     docker:
@@ -30,15 +26,38 @@ jobs:
           name: Install Frontend Dependencies
           command: |
             cd frontend
-            if [ -f package.json ]; then
-              npm install
-              npm run build
-            else
-              echo "No package.json found"
-            fi
+            npm install
+            npm run build
+
+  deploy_to_ec2:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - add_ssh_keys:
+          fingerprints:
+            - "	SHA256:tJRSAry4KQvSmwajdRx0E6aEiDKrt76yj4TCXrcjSAI"
+      - run:
+          name: Deploy to EC2
+          command: |
+            ssh -o StrictHostKeyChecking=no ec2-user@43.205.114.28 "
+              if [ ! -d /home/ec2-user/blog-app ]; then
+                git clone https://github.com/saikiran290/hashtek-blog-app.git /home/ec2-user/blog-app
+              fi &&
+              cd /home/ec2-user/blog-app &&
+              git pull origin main &&
+
+              cd backend && npm install && cd .. &&
+              cd frontend && npm install && npm run build && cd .. &&
+
+              pm2 restart blog-app || pm2 start backend/server.js --name blog-app
+            "
 
 workflows:
   ci_cd_pipeline:
     jobs:
       - backend_ci
       - frontend_ci
+      - deploy_to_ec2:
+          requires:
+            - backend_ci
+            - frontend_ci
