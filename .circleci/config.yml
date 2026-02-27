@@ -55,7 +55,7 @@ jobs:
                 git clone https://github.com/saikiran290/hashtek-blog-app.git /home/ec2-user/blog-app
               fi &&
               cd /home/ec2-user/blog-app &&
-              export DATABASE_URL="postgresql://postgres:saipotnuru%40123@localhost:5432/postgres" &&
+              export DATABASE_URL="postgresql://postgres:saipotnuru%40123@localhost:5432/postgresscontent_media_app" &&
               git pull origin main &&
               cd backend && npm install && cd .. &&
               cd frontend && npm install && npm run build && cd .. &&
