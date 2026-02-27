@@ -53,6 +53,26 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Database health check
+app.get('/api/health/db', async (req, res) => {
+  try {
+    const db = require('./config/database');
+    const result = await db.query('SELECT NOW() as current_time, current_database() as database');
+    res.json({ 
+      status: 'Connected', 
+      database: result.rows[0].database,
+      current_time: result.rows[0].current_time,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      status: 'Disconnected', 
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error('Error:', err);
