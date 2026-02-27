@@ -55,17 +55,17 @@ jobs:
                 git clone https://github.com/saikiran290/hashtek-blog-app.git /home/ec2-user/blog-app
               fi &&
               cd /home/ec2-user/blog-app &&
+              git pull origin main --force &&
               export DATABASE_URL="postgresql://postgres:saipotnuru%40123@localhost:5432/postgresscontent_media_app" &&
               export JWT_SECRET="superpower123" &&
               export JWT_EXPIRES_IN="7d" &&
               export BCRYPT_ROUNDS="12" &&
               export NODE_ENV="production" &&
               export CORS_ORIGIN="http://localhost:3000" &&
-              git pull origin main &&
               cd backend && npm install && cd .. &&
               cd frontend && npm install && npm run build && cd .. &&
               ls -la frontend/dist/ &&
-              pm2 restart blog-app || pm2 start backend/server.js --name blog-app
+              pm2 restart blog-app -f || pm2 start backend/server.js --name blog-app
             "
 
 workflows:
