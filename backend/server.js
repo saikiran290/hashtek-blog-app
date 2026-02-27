@@ -29,7 +29,13 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files from frontend build
-app.use(express.static(path.join(__dirname, '../frontend/dist')));
+const frontendDist = path.join(__dirname, '../frontend/dist');
+if (require('fs').existsSync(frontendDist)) {
+  app.use(express.static(frontendDist));
+  console.log('Serving frontend from:', frontendDist);
+} else {
+  console.log('Frontend dist folder not found at:', frontendDist);
+}
 
 // Routes
 app.use('/api/auth', authRoutes);
