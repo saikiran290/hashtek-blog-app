@@ -56,7 +56,7 @@ jobs:
               fi &&
               cd /home/ec2-user/blog-app &&
               git pull origin main --force &&
-              export DATABASE_URL="postgresql://postgres:saipotnuru%40123@localhost:5432/postgresscontent_media_app" &&
+              export DATABASE_URL="postgresql://postgres:saipotnuru@123@localhost:5432/postgresscontent_media_app" &&
               export JWT_SECRET="superpower123" &&
               export JWT_EXPIRES_IN="7d" &&
               export BCRYPT_ROUNDS="12" &&
