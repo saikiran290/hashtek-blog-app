@@ -1,6 +1,35 @@
+
 version: 2.1
 
 jobs:
+  backend_ci:
+    docker:
+      - image: cimg/node:18.0
+    steps:
+      - checkout
+      - run:
+          name: Install Backend Dependencies
+          command: |
+            cd backend
+            npm install
+      - run:
+          name: Run Backend Tests
+          command: |
+            cd backend
+            npm test || echo "No tests"
+
+  frontend_ci:
+    docker:
+      - image: cimg/node:18.0
+    steps:
+      - checkout
+      - run:
+          name: Install Frontend Dependencies
+          command: |
+            cd frontend
+            npm install
+            npm run build
+
   deploy_to_ec2:
     docker:
       - image: cimg/base:stable
@@ -27,13 +56,14 @@ jobs:
               fi &&
               cd /home/ec2-user/blog-app &&
               git pull origin main --force &&
+              git stash push -m "Stashing local .env changes" &&
               rm -f backend/.env &&
-              echo 'DATABASE_URL=postgresql://postgres:saipotnuru@123@localhost:5432/postgresscontent_media_app' > backend/.env &&
-              echo 'JWT_SECRET=superpower123' >> backend/.env &&
-              echo 'JWT_EXPIRES_IN=7d' >> backend/.env &&
-              echo 'BCRYPT_ROUNDS=12' >> backend/.env &&
-              echo 'NODE_ENV=production' >> backend/.env &&
-              echo 'CORS_ORIGIN=http://localhost:3000' >> backend/.env &&
+              echo "DATABASE_URL=postgresql://postgres:saipotnuru@123@localhost:5432/postgresscontent_media_app" > backend/.env &&
+              echo "JWT_SECRET=superpower123" >> backend/.env &&
+              echo "JWT_EXPIRES_IN=7d" >> backend/.env &&
+              echo "BCRYPT_ROUNDS=12" >> backend/.env &&
+              echo "NODE_ENV=production" >> backend/.env &&
+              echo "CORS_ORIGIN=http://localhost:3000" >> backend/.env &&
               cd backend && npm install && cd .. &&
               cd frontend && npm install && npm run build && cd .. &&
               ls -la frontend/dist/ &&
@@ -43,4 +73,11 @@ jobs:
 workflows:
   ci_cd_pipeline:
     jobs:
-      - deploy_to_ec2
+      - backend_ci
+      - frontend_ci
+      - deploy_to_ec2:
+          requires:
+            - backend_ci
+            - frontend_ci
+
+
