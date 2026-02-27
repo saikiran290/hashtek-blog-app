@@ -56,12 +56,14 @@ jobs:
               fi &&
               cd /home/ec2-user/blog-app &&
               git pull origin main --force &&
-              export DATABASE_URL="postgresql://postgres:saipotnuru@123@localhost:5432/postgresscontent_media_app" &&
-              export JWT_SECRET="superpower123" &&
-              export JWT_EXPIRES_IN="7d" &&
-              export BCRYPT_ROUNDS="12" &&
-              export NODE_ENV="production" &&
-              export CORS_ORIGIN="http://localhost:3000" &&
+              git stash push -m "Stashing local .env changes" &&
+              rm -f backend/.env &&
+              echo "DATABASE_URL=postgresql://postgres:saipotnuru@123@localhost:5432/postgresscontent_media_app" > backend/.env &&
+              echo "JWT_SECRET=superpower123" >> backend/.env &&
+              echo "JWT_EXPIRES_IN=7d" >> backend/.env &&
+              echo "BCRYPT_ROUNDS=12" >> backend/.env &&
+              echo "NODE_ENV=production" >> backend/.env &&
+              echo "CORS_ORIGIN=http://localhost:3000" >> backend/.env &&
               cd backend && npm install && cd .. &&
               cd frontend && npm install && npm run build && cd .. &&
               ls -la frontend/dist/ &&
