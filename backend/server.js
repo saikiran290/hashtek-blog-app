@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
+const path = require('path');
 require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
@@ -21,11 +22,14 @@ const limiter = rateLimit({
 app.use(helmet());
 app.use(limiter);
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: process.env.CORS_ORIGIN || ['http://localhost:3000', 'http://43.205.114.28:3000'],
   credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from frontend build
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -69,10 +73,16 @@ app.use('*', (req, res) => {
   });
 });
 
+// Serve React app for all non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV}`);
   console.log(`API URL: http://localhost:${PORT}/api`);
+  console.log(`Frontend served at: http://localhost:${PORT}`);
 });
 
 module.exports = app;
