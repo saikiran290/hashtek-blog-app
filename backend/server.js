@@ -19,10 +19,10 @@ const limiter = rateLimit({
 });
 
 // Middleware
-app.use(helmet({
-  crossOriginOpenerPolicy: false,
-  originAgentCluster: false,
-}));
+// app.use(helmet({
+//   crossOriginOpenerPolicy: false,
+//   originAgentCluster: false,
+// }));
 app.use(limiter);
 app.use(cors({
   origin: process.env.CORS_ORIGIN || ['http://localhost:3000', 'http://43.205.114.28:3000'],
